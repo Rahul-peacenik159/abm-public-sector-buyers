@@ -1,0 +1,24 @@
+# Describe your category the way it appears in US federal contract descriptions.
+# EXAMPLE: identity and access management software.
+
+keywords: ["identity management", "identity and access management", "zero trust", "multi-factor authentication"]
+naics: ["541512", "541519", "511210", "513210"]   # used for SAM.gov opportunities (computer systems design, other IT, software)
+competitors: ["Okta", "Ping Identity", "SailPoint", "CyberArk"]   # matched against award recipient names
+
+lookback_days: 730          # awards that started within this window
+ending_within_days: 365     # contracts ending this soon = recompete window
+new_award_days: 90          # awards that started this recently
+min_award_amount: 25000     # ignore smaller awards
+award_types: ["A", "B", "C", "D"]   # contracts: BPA call, purchase order, delivery order, definitive contract
+
+weights:
+  contract_ending_soon: 25
+  incumbent_competitor: 20
+  new_award_in_category: 10
+  open_opportunity: 30
+
+plays:
+  contract_ending_soon: recompete_positioning
+  incumbent_competitor: incumbent_displacement
+  new_award_in_category: adjacent_expansion
+  open_opportunity: bid_or_partner

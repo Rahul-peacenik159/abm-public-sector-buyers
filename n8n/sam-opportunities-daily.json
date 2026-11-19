@@ -1,0 +1,206 @@
+{
+  "name": "ABM public sector: new SAM.gov opportunities (daily)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "9cc03e12-d77e-4d10-b7ef-2ad1bbacf500",
+      "name": "Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "4dd362c1-6d85-4fca-95ed-57fb83ccdfce",
+      "name": "Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Daily: open SAM.gov notices posted yesterday/today whose title matches your keywords.\nconst fmt = (d) => `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;\nconst to = new Date();\nconst from = new Date(Date.now() - 2 * 864e5);\nconst KEYWORDS = ['identity management', 'zero trust'];   // edit\nreturn KEYWORDS.map((keyword) => ({ json: { keyword, postedFrom: fmt(from), postedTo: fmt(to) } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "id": "441066b7-fdc3-4cc0-bfe0-b4305f8ae029",
+      "name": "Date range and keywords",
+      "position": [
+        240,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.sam.gov/opportunities/v2/search",
+        "options": {
+          "timeout": 30000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1000
+            }
+          }
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "YOUR_SAM_API_KEY"
+            },
+            {
+              "name": "postedFrom",
+              "value": "={{ $json.postedFrom }}"
+            },
+            {
+              "name": "postedTo",
+              "value": "={{ $json.postedTo }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.keyword }}"
+            },
+            {
+              "name": "limit",
+              "value": "1000"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "f97eaa29-4dd9-471b-a165-530d8636f463",
+      "name": "SAM.gov opportunities",
+      "position": [
+        480,
+        100
+      ],
+      "notes": "Put your free SAM.gov public API key here (better: an n8n credential / variable)."
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date().toISOString();\nconst seen = new Set();\nconst out = [];\nfor (const item of $('SAM.gov opportunities').all()) {\n  for (const o of (item.json.opportunitiesData || [])) {\n    if (seen.has(o.noticeId) || String(o.active).toLowerCase() !== 'yes') continue;\n    seen.add(o.noticeId);\n    const agency = (o.fullParentPathName || 'Unknown').split('.')[0];\n    out.push({ json: { account_domain: 'agency:' + agency.toLowerCase().replace(/[^a-z0-9]+/g, '-'),\n      signal_type: 'open_opportunity', signal_value: o.noticeId, tool_name: agency, category: 'sam_opportunity',\n      role: 'trigger', weight: 30, play: 'bid_or_partner', source: 'sam.gov',\n      evidence: `${o.type}: ${o.title} (respond by ${(o.responseDeadLine || '').slice(0, 10)})`,\n      evidence_url: o.uiLink, pack: 'public-sector-buyers', observed_at: now } });\n  }\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "id": "61cce798-50cb-427b-be11-86cbb9abd147",
+      "name": "Map to signals",
+      "position": [
+        720,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "projectId": {
+          "__rl": true,
+          "value": "YOUR_GCP_PROJECT",
+          "mode": "id"
+        },
+        "datasetId": {
+          "__rl": true,
+          "value": "abm",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "signals",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "id": "0d7752e4-b4ae-48df-a79f-b36710b58792",
+      "name": "Write to BigQuery abm.signals",
+      "position": [
+        960,
+        100
+      ],
+      "notes": "Or swap for Slack: post each new opportunity to a channel."
+    }
+  ],
+  "connections": {
+    "Manual run": {
+      "main": [
+        [
+          {
+            "node": "Date range and keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date range and keywords": {
+      "main": [
+        [
+          {
+            "node": "SAM.gov opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAM.gov opportunities": {
+      "main": [
+        [
+          {
+            "node": "Map to signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map to signals": {
+      "main": [
+        [
+          {
+            "node": "Write to BigQuery abm.signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily": {
+      "main": [
+        [
+          {
+            "node": "Date range and keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

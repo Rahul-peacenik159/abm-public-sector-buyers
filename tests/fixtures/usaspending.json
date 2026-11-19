@@ -1,0 +1,44 @@
+{
+ "results": [
+  {
+   "internal_id": 1,
+   "Award ID": "AW1",
+   "Recipient Name": "OKTA INC",
+   "Award Amount": 2500000.0,
+   "Awarding Agency": "Department of Veterans Affairs",
+   "Awarding Sub Agency": "Veterans Affairs",
+   "Start Date": "2025-06-01",
+   "End Date": "2027-03-31",
+   "Description": "IDENTITY MANAGEMENT SAAS",
+   "generated_internal_id": "CONT_AWD_AW1"
+  },
+  {
+   "internal_id": 2,
+   "Award ID": "AW2",
+   "Recipient Name": "ACME FEDERAL LLC",
+   "Award Amount": 900000.0,
+   "Awarding Agency": "Department of Veterans Affairs",
+   "Awarding Sub Agency": "Veterans Affairs",
+   "Start Date": "2026-10-01",
+   "End Date": "2029-09-30",
+   "Description": "ZERO TRUST SUPPORT",
+   "generated_internal_id": "CONT_AWD_AW2"
+  },
+  {
+   "internal_id": 3,
+   "Award ID": "AW3",
+   "Recipient Name": "SMALL CO",
+   "Award Amount": 5000.0,
+   "Awarding Agency": "Department of Energy",
+   "Awarding Sub Agency": "DOE",
+   "Start Date": "2026-01-01",
+   "End Date": "2026-12-31",
+   "Description": "MFA TOKENS",
+   "generated_internal_id": "CONT_AWD_AW3"
+  }
+ ],
+ "page_metadata": {
+  "page": 1,
+  "hasNext": false
+ }
+}

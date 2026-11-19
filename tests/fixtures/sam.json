@@ -1,0 +1,25 @@
+{
+ "totalRecords": 2,
+ "opportunitiesData": [
+  {
+   "noticeId": "N1",
+   "title": "Enterprise Identity and Access Management Platform",
+   "solicitationNumber": "S1",
+   "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE ARMY.AMC",
+   "postedDate": "2026-11-10",
+   "type": "Solicitation",
+   "responseDeadLine": "2026-12-15T17:00:00-05:00",
+   "naicsCode": "541512",
+   "uiLink": "https://sam.gov/opp/N1/view",
+   "active": "Yes"
+  },
+  {
+   "noticeId": "N2",
+   "title": "Old notice",
+   "fullParentPathName": "DEPT OF ENERGY",
+   "postedDate": "2026-11-01",
+   "type": "Award Notice",
+   "active": "No"
+  }
+ ]
+}
